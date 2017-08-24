@@ -110,7 +110,7 @@ rocksdb::Status tigers::Query<T>::Delete(const T& model) {
   if (ctx_.IsEmpty()) return rocksdb::Status::NotFound();
 
   rocksdb::WriteBatch batch;
-  batch.Delete(getIndexKey(model.row_key()));
+  batch.Delete(getHandle(), getIndexKey(model.row_key()));
   for (auto const& attr : attributes(model)) {
     std::string key = model.row_key() + '.' + attr.first;
     batch.Delete(getHandle(), key);
