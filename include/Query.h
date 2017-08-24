@@ -30,6 +30,7 @@ class Query : public Model::Accessor {
   
  private:
   explicit Query(ops_context_t ctx);
+  rocksdb::Status putAttributes(const std::string& key, const T& model);
 
   ops_context_t ctx_;
 

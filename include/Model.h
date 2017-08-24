@@ -38,7 +38,7 @@ class Model {
   virtual ~Model() = default;
 
   bool HasAttribute(const std::string& name) const;
-
+  bool HasRowKey() const;
   const RowKey& row_key() const;
 
  protected:
@@ -64,7 +64,7 @@ class Model {
       model.set_row_key(key);
     }
 
-    AttributePair attributes(Model& model) const {
+    AttributePair attributes(const Model& model) const {
       return model.attributes();
     }
   };

@@ -1,6 +1,7 @@
 #include "Model.h"
 
-tigers::Model::Model() {
+tigers::Model::Model() 
+    : ctx_({nullptr, nullptr}) {
 
 }
 
@@ -17,7 +18,11 @@ tigers::Model& tigers::Model::operator=(Model&& other) {
 }
 
 bool tigers::Model::HasAttribute(const std::string& attr_name) const {
-  return this->attrs_.find(attr_name) != std::end(this->attrs_);
+  return attrs_.find(attr_name) != std::end(attrs_);
+}
+
+bool tigers::Model::HasRowKey() const {
+  return !row_key_.empty();
 }
 
 const tigers::RowKey& tigers::Model::row_key() const {

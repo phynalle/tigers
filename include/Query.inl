@@ -23,15 +23,7 @@ std::vector<T> tigers::Query<T>::Scan(const std::string& start, const std::strin
 
 template <class T>
 rocksdb::Status tigers::Query<T>::Put(const std::string& row_key, T& model) {
-  if (ctx_.IsEmpty()) return rocksdb::Status::NotFound();
-
-  rocksdb::WriteBatch batch;
-  for (auto const& attr : attributes(model)) {
-    std::string key = row_key + '.' + attr.first;
-    batch.Put(ctx_.cf_handle, key, CallGet(attr.second));
-  }
-
-  auto status = ctx_.db->Write(rocksdb::WriteOptions(), &batch);
+  auto status = putAttributes(row_key, model);
   if (status.ok()) {
     set_row_key(model, row_key);
   }
@@ -59,20 +51,42 @@ rocksdb::Status tigers::Query<T>::Get(const std::string& row_key, T& model) {
 
 template <class T>
 rocksdb::Status tigers::Query<T>::Update(const T& model) {
-  if (ctx_.IsEmpty()) return rocksdb::Status::NotFound();
-  return rocksdb::Status::OK();
+  if (!model.HasRowKey()) return rocksdb::Status::InvalidArgument();
+  return putAttributes(model.row_keys(), model);
 } 
 
 template <class T>
 rocksdb::Status tigers::Query<T>::Delete(const T& model) {
+  if (!model.HasRowKey()) return rocksdb::Status::InvalidArgument();
   if (ctx_.IsEmpty()) return rocksdb::Status::NotFound();
-  return rocksdb::Status::OK();
+
+  rocksdb::WriteBatch batch;
+  for (auto const& attr : attributes(model)) {
+    std::string key = model.row_key() + '.' + attr.first;
+    batch.Delete(ctx_.cf_handle, key);
+  }
+
+  return ctx_.db->Write(rocksdb::WriteOptions(), &batch);
 } 
 
 template <class T>
 bool tigers::Query<T>::Exists(const std::string& key) {
   if (ctx_.IsEmpty()) return false;
   return false;
+} 
+
+template <class T>
+rocksdb::Status tigers::Query<T>::putAttributes(const std::string& row_key, const 
+  T& model) {
+  if (ctx_.IsEmpty()) return rocksdb::Status::NotFound();
+
+  rocksdb::WriteBatch batch;
+  for (auto const& attr : attributes(model)) {
+    std::string key = row_key + '.' + attr.first;
+    batch.Put(ctx_.cf_handle, key, CallGet(attr.second));
+  }
+
+  return ctx_.db->Write(rocksdb::WriteOptions(), &batch);
 } 
 
 #endif /* TIGERS_QUERY_INL */
