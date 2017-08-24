@@ -54,6 +54,8 @@ rocksdb::Options tigers::Tigers::DefaultOptions() {
 
 tigers::ops_context_t tigers::Tigers::getOrCreateOpsContext(
     const std::string& cf_name) {
+  std::lock_guard<std::mutex> lock{mutex_};
+  
   auto it = cf_handles_.find(cf_name);
   if (it == std::end(cf_handles_)) {
     rocksdb::ColumnFamilyHandle* cf_handle;

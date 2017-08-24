@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <mutex>
 #include <unordered_map>
 
 #include <rocksdb/db.h>
@@ -44,6 +45,7 @@ class Tigers {
 
   std::unique_ptr<rocksdb::DB> db_;
   ColumnFamilyHandles cf_handles_; 
+  std::mutex mutex_;
 };
 
 } /* namespace tigers */
