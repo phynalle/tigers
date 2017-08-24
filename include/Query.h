@@ -6,13 +6,14 @@
 #include <rocksdb/db.h>
 
 #include "types.h"
+#include "Model.h"
 
 namespace tigers {
 
 class Tigers;
 
 template <class T>
-class Query {
+class Query : public Model::Accessor {
  public:
   Query(Query &&) = default;
   Query(const Query &) = default;
@@ -21,16 +22,17 @@ class Query {
   ~Query() = default;
 
   std::vector<T> Scan(const std::string& start, const std::string& end, int size);
-  bool Put(const std::string& key, T& model);
-  bool Get(const std::string& key, T& model);
-  bool Update(const T& model);
-  bool Delete(const T& model);
+  rocksdb::Status Put(const std::string& key, T& model);
+  rocksdb::Status Get(const std::string& key, T& model);
+  rocksdb::Status Update(const T& model);
+  rocksdb::Status Delete(const T& model);
   bool Exists(const std::string& key);
   
  private:
   explicit Query(ops_context_t ctx);
 
   ops_context_t ctx_;
+
   friend class Tigers;
 };
 

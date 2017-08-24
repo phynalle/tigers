@@ -4,20 +4,32 @@ tigers::Model::Model() {
 
 }
 
+tigers::Model& tigers::Model::operator=(const Model& other) {
+  ctx_ = other.ctx_;
+  row_key_ = other.row_key_;
+  return *this;
+}
+
+tigers::Model& tigers::Model::operator=(Model&& other) {
+  ctx_ = std::move(other.ctx_);
+  row_key_ = std::move(other.row_key_);
+  return *this;
+}
+
 bool tigers::Model::HasAttribute(const std::string& attr_name) const {
   return this->attrs_.find(attr_name) != std::end(this->attrs_);
 }
 
-// const std::string& tigers::Model::name() const {
-//   return this->name_;
-// }
-
 const tigers::RowKey& tigers::Model::row_key() const {
-  return this->row_key_;
+  return row_key_;
 }
 
 void tigers::Model::set_row_key(const tigers::RowKey& key) {
-  this->row_key_ = key;
+  row_key_ = key;
+}
+
+void tigers::Model::set_ops_context(tigers::ops_context_t ctx) {
+  ctx_ = ctx;
 }
 
 bool tigers::Model::bindAttr(

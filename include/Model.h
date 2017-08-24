@@ -24,27 +24,52 @@ AttributeBinder MakeStringBinder(std::reference_wrapper<std::string> s);
 
 class Model {
  public:
-  Model();
+  explicit Model();
+
+  // Move and copy constructors are not allowed because binding attributes is
+  // better be written once.
   Model(const Model&) = delete;
   Model(Model&&) = delete;
-  Model &operator=(Model &&) = delete;
-  Model &operator=(const Model &) = delete;
+
+  // Assign operators must not copy or move attrs_ because it has references
+  // to variables in model objects allocated.
+  Model& operator=(const Model &);
+  Model& operator=(Model &&);
   virtual ~Model() = default;
 
   bool HasAttribute(const std::string& name) const;
 
   const RowKey& row_key() const;
-  void set_row_key(const RowKey& key);
-  
+
  protected:
   bool bindAttr(const std::string& attr_name, AttributeBinder binder);
-
- private:
   AttributePair attributes() const;
 
-  // std::string name_;
+ private:
+  void set_ops_context(ops_context_t ctx);
+  void set_row_key(const RowKey& key);
+
+  ops_context_t ctx_;
   std::string row_key_;
   std::unordered_map<std::string, AttributeBinder> attrs_;
+
+ public:
+  class Accessor {
+   protected: 
+    void set_ops_context(Model& model, ops_context_t ctx) {
+      model.set_ops_context(ctx);
+    }
+    
+    void set_row_key(Model& model, const RowKey& key) {
+      model.set_row_key(key);
+    }
+
+    AttributePair attributes(Model& model) const {
+      return model.attributes();
+    }
+  };
+
+  friend class Accessor;
 };
 
 } /* namespace tigers */
