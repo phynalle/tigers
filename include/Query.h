@@ -21,16 +21,34 @@ class Query : public Model::Accessor {
   Query &operator=(const Query &) = default;
   ~Query() = default;
 
-  std::vector<T> Scan(const std::string& start, const std::string& end, int size);
+  rocksdb::Status ScanIndex(
+      const std::string& start,
+      std::vector<std::string>& results,
+      size_t max=0) const;
+  rocksdb::Status ScanIndex
+  (std::vector<std::string>& results, size_t max=0) const {
+    return ScanIndex(std::string{}, results, max);
+  }
+
   rocksdb::Status Put(const std::string& key, T& model);
-  rocksdb::Status Get(const std::string& key, T& model);
+  rocksdb::Status Get(const std::string& key, T& model) const;
+  rocksdb::Status MultiGet(
+      const std::vector<std::string>& keys,
+      std::vector<std::unique_ptr<T>>& models) const;
   rocksdb::Status Update(const T& model);
   rocksdb::Status Delete(const T& model);
-  bool Exists(const std::string& key);
+  bool Exists(const std::string& key) const;
   
  private:
   explicit Query(ops_context_t ctx);
-  rocksdb::Status putAttributes(const std::string& key, const T& model);
+  void putAttributes(
+      const std::string& key, 
+      const T& model,
+      rocksdb::WriteBatch&) const;
+
+  std::string getIndexKey(const std::string& row_key) const;
+  rocksdb::DB* getDB() const;
+  rocksdb::ColumnFamilyHandle* getHandle() const;
 
   ops_context_t ctx_;
 

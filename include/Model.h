@@ -56,11 +56,11 @@ class Model {
  public:
   class Accessor {
    protected: 
-    void set_ops_context(Model& model, ops_context_t ctx) {
+    void set_ops_context(Model& model, ops_context_t ctx) const {
       model.set_ops_context(ctx);
     }
     
-    void set_row_key(Model& model, const RowKey& key) {
+    void set_row_key(Model& model, const RowKey& key) const {
       model.set_row_key(key);
     }
 
